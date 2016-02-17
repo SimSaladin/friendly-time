@@ -13,6 +13,7 @@ module Data.Time.Format.Human
     , humanReadableTimeI18N'
     , HumanTimeLocale(..)
     , defaultHumanTimeLocale
+    , finnishHumanTimeLocale
     ) where
 
 import Data.Time
@@ -75,6 +76,44 @@ defaultHumanTimeLocale = HumanTimeLocale
     }
     where dir True  = " from now"
           dir False = " ago"
+
+-- | Finnish human time locale.
+--
+-- Default @timeZone@ is EET (+0200).
+finnishHumanTimeLocale :: HumanTimeLocale
+finnishHumanTimeLocale = defaultHumanTimeLocale
+    { justNow       = "juuri nyt"
+    , secondsAgo    = dir " sekuntia" " sekunnin"
+    , oneMinuteAgo  = \f -> dir "minuutti" " minuutin" f ""
+    , minutesAgo    = dir " minuuttia" " minuutin"
+    , oneHourAgo    = \f -> dir "tunti" "tunnin" f ""
+    , aboutHoursAgo = \f x -> "noin " ++ dir " tuntia" " tunnin" f x
+    , at            = \_ x -> x
+    , daysAgo      = dir " päivää" " päivän"
+    , weekAgo      = dir " viikko" " viikon"
+    , weeksAgo     = dir " viikkoa" " viikon"
+    , onYear       = id
+    , locale       = finnishTimeLocale
+    , timeZone     = read "+0200"
+    , dayOfWeekFmt = "%A klo %k.%M"
+    , thisYearFmt  = "%e. %B"
+    , prevYearFmt  = "%e. %B, %Y"
+    }
+    where dir _ x True  = (++ x ++ " kuluttua")
+          dir x _ False = (++ x ++ " sitten")
+
+          finnishTimeLocale = defaultTimeLocale
+            { wDays = [("sunnuntaina", "su"), ("maanantaina", "ma")
+                      ,("tiistaina", "ti"), ("keskiviikkona", "ke")
+                      ,("torstaina", "to"), ("perjantaina", "pe")
+                      ,("lauantaina", "la")]
+            , months = [("tammikuuta", "tam"), ("helmikuuta", "hel")
+                       ,("maaliskuuta", "maa"), ("huhtikuuta", "huh")
+                       ,("toukokuuta", "tou"), ("kesäkuuta", "kes")
+                       ,("heinäkuuta", "hei"), ("elokuuta", "elo")
+                       ,("syyskuuta", "syy"), ("lokakuuta", "lok")
+                       ,("marraskuuta", "mar"), ("joulukuuta", "jou")]
+            }
 
 -- | Based on @humanReadableTimeDiff@ found in
 --   <https://github.com/snoyberg/haskellers/blob/master/Haskellers.hs>,
